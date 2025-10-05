@@ -127,7 +127,7 @@ const CorrelationMatrix = ({ data, features, title = "Feature Correlation Matrix
         </div>
         <div className="flex items-center space-x-2">
           <div className="w-4 h-4 bg-gray-500 rounded"></div>
-          <span className="text-sm text-space-400">None (<0.2)</span>
+          <span className="text-sm text-space-400">None (&lt;0.2)</span>
         </div>
       </div>
     </div>
