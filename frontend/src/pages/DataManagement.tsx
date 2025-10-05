@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Upload, Database, FileText, Download, Trash2, Eye } from 'lucide-react';
+import { useGetSampleDataQuery } from '../store/api/exoplanetApi';
 import DatasetUpload from '../components/forms/DatasetUpload';
 import DatasetTable from '../components/data/DatasetTable';
 import DataPreview from '../components/data/DataPreview';
@@ -7,6 +8,7 @@ import DataPreview from '../components/data/DataPreview';
 const DataManagement = () => {
   const [activeTab, setActiveTab] = useState<'upload' | 'datasets' | 'preview'>('upload');
   const [selectedDataset, setSelectedDataset] = useState<string | null>(null);
+  const { data: sampleData, isLoading: dataLoading, error: dataError } = useGetSampleDataQuery();
 
   const tabs = [
     { id: 'upload', name: 'Upload Data', icon: Upload },
@@ -51,10 +53,20 @@ const DataManagement = () => {
       <div className="mt-6">
         {activeTab === 'upload' && <DatasetUpload />}
         {activeTab === 'datasets' && (
-          <DatasetTable onSelectDataset={setSelectedDataset} />
+          <DatasetTable 
+            data={Array.isArray(sampleData) ? sampleData : []} 
+            loading={dataLoading} 
+            error={dataError}
+            onSelectDataset={setSelectedDataset} 
+          />
         )}
         {activeTab === 'preview' && (
-          <DataPreview datasetId={selectedDataset} />
+          <DataPreview 
+            data={Array.isArray(sampleData) ? sampleData : []} 
+            loading={dataLoading} 
+            error={dataError}
+            datasetId={selectedDataset} 
+          />
         )}
       </div>
     </div>

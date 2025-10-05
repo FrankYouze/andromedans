@@ -1,0 +1,6 @@
+planet_name,orbital_period,transit_duration,planetary_radius,stellar_radius,stellar_mass,effective_temperature,metallicity,surface_gravity,classification,discovery_date
+Kepler-452b,384.843,2.5,1.6,1.05,1.04,5757,0.04,4.32,Confirmed,2015-07-23
+TOI-715b,19.288,1.2,1.55,0.6,0.73,4325,0.0,4.7,Candidate,2023-01-01
+K2-18b,33.0,2.1,2.37,0.41,0.36,3457,0.12,4.68,Confirmed,2015-01-01
+TESS-1234b,12.4,0.8,0.8,0.9,0.85,5200,0.1,4.5,False Positive,2022-01-01
+Kepler-1649c,19.5,1.1,1.06,0.23,0.22,3240,0.0,4.99,Confirmed,2020-04-15

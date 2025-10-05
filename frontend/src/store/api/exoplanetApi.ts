@@ -15,14 +15,20 @@ import type {
 export const exoplanetApi = createApi({
   reducerPath: 'exoplanetApi',
   baseQuery: fetchBaseQuery({
-    baseUrl: '/api',
+    baseUrl: 'https://5314b2b30c23.ngrok-free.app/api',
     prepareHeaders: (headers) => {
       headers.set('Content-Type', 'application/json');
+      headers.set('ngrok-skip-browser-warning', 'true');
       return headers;
     },
   }),
   tagTypes: ['ModelStats', 'Predictions', 'Datasets', 'Performance'],
   endpoints: (builder) => ({
+    // Root endpoint
+    getRoot: builder.query<any, void>({
+      query: () => '',
+    }),
+    
     // Model Statistics
     getModelStats: builder.query<ModelStats, void>({
       query: () => 'stats',
@@ -39,15 +45,6 @@ export const exoplanetApi = createApi({
       invalidatesTags: ['Predictions'],
     }),
     
-    classifyBatch: builder.mutation<BatchClassificationResult, FormData>({
-      query: (formData) => ({
-        url: 'predict/batch',
-        method: 'POST',
-        body: formData,
-      }),
-      invalidatesTags: ['Predictions'],
-    }),
-    
     // Data Management
     uploadDataset: builder.mutation<UploadResponse, FormData>({
       query: (formData) => ({
@@ -58,56 +55,39 @@ export const exoplanetApi = createApi({
       invalidatesTags: ['Datasets'],
     }),
     
-    getDatasets: builder.query<Dataset[], void>({
+    getSampleData: builder.query<Exoplanet[], void>({
       query: () => 'data',
       providesTags: ['Datasets'],
     }),
     
-    getDatasetPreview: builder.query<Exoplanet[], string>({
-      query: (id) => `data/${id}/preview`,
-    }),
-    
     // Model Training
-    trainModel: builder.mutation<void, TrainingConfig>({
+    retrainModel: builder.mutation<void, TrainingConfig>({
       query: (config) => ({
-        url: 'train',
+        url: 'retrain',
         method: 'POST',
         body: config,
       }),
       invalidatesTags: ['ModelStats', 'Performance'],
     }),
     
-    getTrainingProgress: builder.query<number, void>({
-      query: () => 'train/progress',
-    }),
-    
-    // Analytics
-    getPerformanceHistory: builder.query<PerformanceMetrics[], void>({
-      query: () => 'analytics/performance',
-      providesTags: ['Performance'],
-    }),
-    
-    getConfusionMatrix: builder.query<ConfusionMatrix, void>({
-      query: () => 'analytics/confusion-matrix',
-    }),
-    
-    // Sample Data
-    getSampleData: builder.query<Exoplanet[], void>({
-      query: () => 'data/sample',
+    // Configuration
+    updateConfig: builder.mutation<void, any>({
+      query: (config) => ({
+        url: 'config',
+        method: 'POST',
+        body: config,
+      }),
+      invalidatesTags: ['ModelStats'],
     }),
   }),
 });
 
 export const {
+  useGetRootQuery,
   useGetModelStatsQuery,
   useClassifySingleMutation,
-  useClassifyBatchMutation,
   useUploadDatasetMutation,
-  useGetDatasetsQuery,
-  useGetDatasetPreviewQuery,
-  useTrainModelMutation,
-  useGetTrainingProgressQuery,
-  useGetPerformanceHistoryQuery,
-  useGetConfusionMatrixQuery,
   useGetSampleDataQuery,
+  useRetrainModelMutation,
+  useUpdateConfigMutation,
 } = exoplanetApi;

@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Search, Upload, FileText, Zap } from 'lucide-react';
+import { useClassifySingleMutation, useUploadDatasetMutation } from '../store/api/exoplanetApi';
+import DatasetUpload from '../components/forms/DatasetUpload';
 
 const Classification = () => {
   const [activeMode, setActiveMode] = useState<'single' | 'batch'>('single');
@@ -13,6 +15,8 @@ const Classification = () => {
     stellarMetallicity: '',
     stellarSurfaceGravity: '',
   });
+  const [classifySingle, { isLoading: isClassifying }] = useClassifySingleMutation();
+  const [uploadDataset, { isLoading: isUploading }] = useUploadDatasetMutation();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -21,9 +25,16 @@ const Classification = () => {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Classifying:', formData);
+    try {
+      const result = await classifySingle(formData).unwrap();
+      console.log('Classification result:', result);
+      // Handle success - maybe show result in UI
+    } catch (error) {
+      console.error('Classification failed:', error);
+      // Handle error - maybe show error message
+    }
   };
 
   return (
@@ -177,10 +188,11 @@ const Classification = () => {
             <div className="flex justify-end">
               <button
                 type="submit"
-                className="btn-primary flex items-center space-x-2"
+                disabled={isClassifying}
+                className="btn-primary flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Zap className="h-4 w-4" />
-                <span>Classify Observation</span>
+                <span>{isClassifying ? 'Classifying...' : 'Classify Observation'}</span>
               </button>
             </div>
           </form>
@@ -191,29 +203,7 @@ const Classification = () => {
       {activeMode === 'batch' && (
         <div className="card">
           <h3 className="text-lg font-semibold text-white mb-6">Batch Processing</h3>
-          <div className="border-2 border-dashed border-space-600 rounded-lg p-8 text-center">
-            <Upload className="h-12 w-12 text-space-400 mx-auto mb-4" />
-            <h4 className="text-lg font-medium text-white mb-2">Upload Dataset</h4>
-            <p className="text-space-400 mb-4">
-              Upload a CSV file containing exoplanet observations for batch classification
-            </p>
-            <input
-              type="file"
-              accept=".csv"
-              className="hidden"
-              id="batch-upload"
-            />
-            <label
-              htmlFor="batch-upload"
-              className="btn-primary cursor-pointer inline-flex items-center space-x-2"
-            >
-              <FileText className="h-4 w-4" />
-              <span>Choose File</span>
-            </label>
-            <p className="text-xs text-space-500 mt-2">
-              Supported formats: CSV, JSON, FITS
-            </p>
-          </div>
+          <DatasetUpload />
         </div>
       )}
 
