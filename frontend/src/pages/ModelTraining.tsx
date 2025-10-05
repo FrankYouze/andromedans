@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import { Brain, Settings, Play, Pause, RotateCcw } from 'lucide-react';
+import { useRetrainModelMutation, useUpdateConfigMutation } from '../store/api/exoplanetApi';
 
 const ModelTraining = () => {
   const [isTraining, setIsTraining] = useState(false);
+  const [retrainModel, { isLoading: isRetraining }] = useRetrainModelMutation();
+  const [updateConfig] = useUpdateConfigMutation();
 
   return (
     <div className="space-y-6">

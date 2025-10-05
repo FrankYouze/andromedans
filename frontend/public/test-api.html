@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Connection Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success { background-color: #2d5a2d; }
+        .error { background-color: #5a2d2d; }
+        .info { background-color: #2d4a5a; }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background-color: #45a049; }
+        pre { background-color: #333; padding: 10px; border-radius: 5px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>ExoVision API Connection Test</h1>
+    
+    <div class="info">
+        <h3>Testing API Endpoints</h3>
+        <p>This page tests the connection to your backend API.</p>
+    </div>
+
+    <button onclick="testRoot()">Test Root Endpoint</button>
+    <button onclick="testStats()">Test Stats Endpoint</button>
+    <button onclick="testData()">Test Data Endpoint</button>
+    <button onclick="testAll()">Test All Endpoints</button>
+
+    <div id="results"></div>
+
+    <script>
+        const API_BASE = 'https://5314b2b30c23.ngrok-free.app/api';
+        
+        function addResult(title, success, message, data = null) {
+            const resultsDiv = document.getElementById('results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result ${success ? 'success' : 'error'}`;
+            
+            let content = `<h4>${title}</h4><p>${message}</p>`;
+            if (data) {
+                content += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            }
+            resultDiv.innerHTML = content;
+            resultsDiv.appendChild(resultDiv);
+        }
+
+        async function testEndpoint(endpoint, name) {
+            try {
+                const response = await fetch(`${API_BASE}${endpoint}`, {
+                    headers: {
+                        'ngrok-skip-browser-warning': 'true'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    addResult(`${name} - SUCCESS`, true, `Status: ${response.status}`, data);
+                } else {
+                    addResult(`${name} - ERROR`, false, `Status: ${response.status} - ${response.statusText}`);
+                }
+            } catch (error) {
+                addResult(`${name} - FAILED`, false, `Network Error: ${error.message}`);
+            }
+        }
+
+        async function testRoot() {
+            await testEndpoint('', 'Root Endpoint');
+        }
+
+        async function testStats() {
+            await testEndpoint('/stats', 'Stats Endpoint');
+        }
+
+        async function testData() {
+            await testEndpoint('/data', 'Data Endpoint');
+        }
+
+        async function testAll() {
+            document.getElementById('results').innerHTML = '';
+            await testRoot();
+            await testStats();
+            await testData();
+        }
+
+        // Auto-test on page load
+        window.onload = function() {
+            addResult('API Test Page Loaded', true, 'Click buttons above to test API endpoints');
+        };
+    </script>
+</body>
+</html>

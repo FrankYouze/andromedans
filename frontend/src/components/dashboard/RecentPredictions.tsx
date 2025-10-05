@@ -1,52 +1,21 @@
-import { useState } from 'react';
 import { Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import type { Exoplanet } from '../../types';
 
-interface Prediction {
-  id: string;
-  name: string;
-  classification: 'Confirmed' | 'Candidate' | 'False Positive';
-  confidence: number;
-  timestamp: string;
+interface RecentPredictionsProps {
+  data?: Exoplanet[];
+  loading?: boolean;
+  error?: any;
 }
 
-const RecentPredictions = () => {
-  const [predictions] = useState<Prediction[]>([
-    {
-      id: '1',
-      name: 'Kepler-452b',
-      classification: 'Confirmed',
-      confidence: 0.95,
-      timestamp: '2025-10-04T14:30:00Z',
-    },
-    {
-      id: '2',
-      name: 'TOI-715b',
-      classification: 'Candidate',
-      confidence: 0.78,
-      timestamp: '2025-10-04T14:25:00Z',
-    },
-    {
-      id: '3',
-      name: 'K2-18b',
-      classification: 'Confirmed',
-      confidence: 0.92,
-      timestamp: '2025-10-04T14:20:00Z',
-    },
-    {
-      id: '4',
-      name: 'TESS-1234b',
-      classification: 'False Positive',
-      confidence: 0.65,
-      timestamp: '2025-10-04T14:15:00Z',
-    },
-    {
-      id: '5',
-      name: 'Kepler-1649c',
-      classification: 'Confirmed',
-      confidence: 0.88,
-      timestamp: '2025-10-04T14:10:00Z',
-    },
-  ]);
+const RecentPredictions = ({ data, loading, error }: RecentPredictionsProps) => {
+  // Debug logging
+  console.log('RecentPredictions received data:', {
+    data,
+    dataType: typeof data,
+    isArray: Array.isArray(data),
+    loading,
+    error
+  });
 
   const getClassificationIcon = (classification: string) => {
     switch (classification) {
@@ -81,48 +50,102 @@ const RecentPredictions = () => {
     });
   };
 
+  if (loading) {
+    return (
+      <div className="card">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-lg font-semibold text-white">Recent Predictions</h3>
+        </div>
+        <div className="space-y-4">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="flex items-center justify-between p-4 bg-gray-700 rounded-lg animate-pulse">
+              <div className="flex items-center space-x-3">
+                <div className="h-4 w-4 bg-gray-600 rounded-full"></div>
+                <div>
+                  <div className="h-4 bg-gray-600 rounded w-24 mb-2"></div>
+                  <div className="h-3 bg-gray-600 rounded w-16"></div>
+                </div>
+              </div>
+              <div className="flex items-center space-x-3">
+                <div className="h-6 bg-gray-600 rounded-full w-20"></div>
+                <div className="text-right">
+                  <div className="h-4 bg-gray-600 rounded w-12 mb-1"></div>
+                  <div className="h-3 bg-gray-600 rounded w-16"></div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="card">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-lg font-semibold text-white">Recent Predictions</h3>
+        </div>
+        <div className="text-center py-8">
+          <p className="text-red-400">Failed to load predictions</p>
+          <p className="text-gray-400 text-sm mt-2">Check your backend connection</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Ensure data is an array and handle edge cases
+  const predictions = Array.isArray(data) ? data : [];
+
   return (
     <div className="card">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-semibold text-white">Recent Predictions</h3>
-        <button className="text-sm text-primary-400 hover:text-primary-300">
+        <button className="text-sm text-blue-400 hover:text-blue-300">
           View All
         </button>
       </div>
       
       <div className="space-y-4">
-        {predictions.map((prediction) => (
-          <div
-            key={prediction.id}
-            className="flex items-center justify-between p-4 bg-space-700 rounded-lg hover:bg-space-600 transition-colors"
-          >
-            <div className="flex items-center space-x-3">
-              {getClassificationIcon(prediction.classification)}
-              <div>
-                <p className="font-medium text-white">{prediction.name}</p>
-                <p className="text-sm text-space-400">
-                  {formatTime(prediction.timestamp)}
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-3">
-              <span
-                className={`px-2 py-1 rounded-full text-xs font-medium ${getClassificationColor(
-                  prediction.classification
-                )}`}
-              >
-                {prediction.classification}
-              </span>
-              <div className="text-right">
-                <p className="text-sm font-medium text-white">
-                  {(prediction.confidence * 100).toFixed(0)}%
-                </p>
-                <p className="text-xs text-space-400">confidence</p>
-              </div>
-            </div>
+        {predictions.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-gray-400">No predictions available</p>
+            <p className="text-gray-500 text-sm mt-2">Upload data to see predictions</p>
           </div>
-        ))}
+        ) : (
+          predictions.slice(0, 5).map((exoplanet, index) => (
+            <div
+              key={exoplanet.id || index}
+              className="flex items-center justify-between p-4 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors"
+            >
+              <div className="flex items-center space-x-3">
+                {getClassificationIcon(exoplanet.disposition || 'Unknown')}
+                <div>
+                  <p className="font-medium text-white">{exoplanet.pl_name || `Exoplanet ${index + 1}`}</p>
+                  <p className="text-sm text-gray-400">
+                    {exoplanet.discovery_date ? formatTime(exoplanet.discovery_date) : 'Unknown date'}
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex items-center space-x-3">
+                <span
+                  className={`px-2 py-1 rounded-full text-xs font-medium ${getClassificationColor(
+                    exoplanet.disposition || 'Unknown'
+                  )}`}
+                >
+                  {exoplanet.disposition || 'Unknown'}
+                </span>
+                <div className="text-right">
+                  <p className="text-sm font-medium text-white">
+                    {exoplanet.pl_orbper ? `${exoplanet.pl_orbper.toFixed(1)} days` : 'N/A'}
+                  </p>
+                  <p className="text-xs text-gray-400">orbital period</p>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
